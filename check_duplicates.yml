@@ -1,0 +1,10 @@
+name: Check for Duplicates
+on: [push, pull_request]
+
+jobs:
+  check-duplicates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for duplicate IOCs
+        run: python check_duplicates.py
