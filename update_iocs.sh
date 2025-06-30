@@ -1,26 +1,26 @@
 #!/bin/bash
 
-# Step 0: Prompt for family name
-read -p "Enter threat family name: " family_name
-
-# Step 0.5: Update local repo first
+# Pull latest changes first
 cd ~/github_repos/iocs
 git pull origin main
 
-# Step 1: Create directory structure
-cd iocs
-mkdir -p "${family_name,,}"
-touch "${family_name,,}/${family_name,,}_iocs.txt"
+# Prompt for family name
+read -p "Enter threat family name: " family_name
+family_lower=$(echo "$family_name" | tr '[:upper:]' '[:lower:]')
 
-# Step 2: Add IOCs
-cd ..
-python add_ioc.py "${family_name,,}" "$(cat /c/Users/PC/github_repos/hashes.txt)"
+# Create directory structure
+mkdir -p "iocs/$family_lower"
+touch "iocs/$family_lower/${family_lower}_iocs.txt"
 
-# Step 3: Check duplicates
+# Process cleaned hashes
+python add_ioc.py "$family_lower" "$(cat /c/Users/PC/github_repos/hashes.txt)"
+
+# Verify and commit
 python check_duplicates.py
-
-# Step 4: Commit and push with retry
 git add .
-git commit -m "Add ${family_name} IOCs"
-git pull origin main  # Reintegrate remote changes
+git commit -m "Add $family_name IOCs ($(wc -l < /c/Users/PC/github_repos/hashes.txt) hashes)"
+
+# Push changes
+git pull origin main  # Reintegrate any remote changes
 git push origin main
+echo "Successfully added $(wc -l < /c/Users/PC/github_repos/hashes.txt) IOCs"
